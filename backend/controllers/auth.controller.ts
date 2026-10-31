@@ -1,16 +1,26 @@
+import env from "../config/env.config";
 import constant from "../config/constant.config";
+import crypto from "node:crypto";
 import type { Request, Response, NextFunction } from "express";
 import type {
   CreateAccountSchema,
+  ForgotPasswordSchema,
   LoginSchema,
+  ResetPasswordSchema,
 } from "../validations/auth.validation";
+import { StatusCodes } from "http-status-codes";
 import { ApiError } from "../lib/error";
 import utils from "../lib/utils";
 import token from "../lib/token";
-import { StatusCodes } from "http-status-codes";
-import { eq } from "drizzle-orm";
+import nodemailer from "../lib/nodemailer";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import db from "../db";
-import { categories, refreshTokens, users } from "../db/schema";
+import {
+  categories,
+  passwordResetTokens,
+  refreshTokens,
+  users,
+} from "../db/schema";
 import bcrypt from "bcrypt";
 
 const createAccount = async (
@@ -135,6 +145,103 @@ const refresh = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const forgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email } = req.body as ForgotPasswordSchema;
+    const [user] = await db
+      .select({ id: users.id, firstName: users.firstName, email: users.email })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    if (user) {
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(passwordResetTokens)
+          .where(
+            and(
+              eq(passwordResetTokens.userId, user.id),
+              isNull(passwordResetTokens.usedAt),
+            ),
+          );
+        await tx.insert(passwordResetTokens).values({
+          userId: user.id,
+          token: token.HashToken(rawToken),
+          expiresAt,
+        });
+      });
+      const html = utils.ReadTemplate("ResetPasswordRequest.html", {
+        firstName: user.firstName,
+        resetPasswordLink: `${env.FRONTEND_URL}/reset-password?token=${rawToken}`,
+        expiredAt: "15 minute.",
+        support: env.SMTP_FROM,
+      });
+      nodemailer.SendMail({
+        to: user.email,
+        subject: "Reset your Expenso password",
+        html,
+      });
+    }
+    return utils.SendSuccess(res, {
+      message:
+        "If an account exists for this email, a reset link has been sent.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { token: resetPasswordToken, password } =
+      req.body as ResetPasswordSchema;
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const userId = await db.transaction(async (tx) => {
+      const [used] = await tx
+        .update(passwordResetTokens)
+        .set({ usedAt: new Date() })
+        .where(
+          and(
+            eq(passwordResetTokens.token, token.HashToken(resetPasswordToken)),
+            isNull(passwordResetTokens.usedAt),
+            gt(passwordResetTokens.expiresAt, new Date()),
+          ),
+        )
+        .returning({ userId: passwordResetTokens.userId });
+      if (!used) return null;
+      await tx
+        .update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, used.userId));
+      await tx
+        .delete(refreshTokens)
+        .where(eq(refreshTokens.userId, used.userId));
+      return used.userId;
+    });
+    if (!userId)
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Invalid or expired reset link.",
+      );
+    res.clearCookie("refresh_token", { path: constant.REFRESH_TOKEN_PATH });
+    return utils.SendSuccess(res, {
+      message: "Password reset. Please log in.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const rawToken = req.cookies.refresh_token;
@@ -150,4 +257,11 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { createAccount, login, refresh, logout };
+export default {
+  createAccount,
+  login,
+  refresh,
+  forgotPassword,
+  resetPassword,
+  logout,
+};
