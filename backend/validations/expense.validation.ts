@@ -1,5 +1,13 @@
 import z from "zod";
 
+const DateStr = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD.")
+  .refine(
+    (v) => new Date(`${v}T00:00:00Z`).toISOString().slice(0, 10) === v,
+    "Invalid date.",
+  );
+
 const CreateExpenseSchema = z.object({
   title: z
     .string("Title is required.")
@@ -14,10 +22,10 @@ const CreateExpenseSchema = z.object({
   date: z
     .string("Date is required.")
     .nonempty("Date is required.")
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD.")
     .refine(
       (v) => new Date(`${v}T00:00:00Z`).toISOString().slice(0, 10) === v,
-      "Invalid date",
+      "Invalid date.",
     ),
   note: z
     .string()
@@ -64,7 +72,38 @@ const UpdateExpenseSchema = CreateExpenseSchema.partial().refine(
   "Provide at least one field to update.",
 );
 
-export default { CreateExpenseSchema, UpdateExpenseSchema, ListExpensesQuery };
+const RangeQuery = z
+  .object({
+    from: DateStr,
+    to: DateStr,
+  })
+  .refine((q) => q.from <= q.to, "from must not be after to.")
+  .refine(
+    (q) => (Date.parse(q.to) - Date.parse(q.from)) / 86_400_000 <= 366,
+    "Range cannot exceed 366 days.",
+  );
+
+const TrendQuery = z
+  .object({
+    from: DateStr,
+    to: DateStr,
+    categoryId: z.string().length(11, "Invalid category id.").optional(),
+  })
+  .refine((q) => q.from <= q.to, "from must not be after to.")
+  .refine(
+    (q) => (Date.parse(q.to) - Date.parse(q.from)) / 86_400_000 <= 366,
+    "Range cannot exceed 366 days.",
+  );
+
+export default {
+  CreateExpenseSchema,
+  UpdateExpenseSchema,
+  ListExpensesQuery,
+  RangeQuery,
+  TrendQuery,
+};
 export type CreateExpenseSchema = z.infer<typeof CreateExpenseSchema>;
 export type UpdateExpenseSchema = z.infer<typeof UpdateExpenseSchema>;
 export type ListExpensesQuery = z.infer<typeof ListExpensesQuery>;
+export type RangeQuery = z.infer<typeof RangeQuery>;
+export type TrendQuery = z.infer<typeof TrendQuery>;

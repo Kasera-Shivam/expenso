@@ -1,8 +1,8 @@
 import express from "express";
 import middleware from "../middleware";
+import commonValidation from "../validations/common.validation";
 import expenseValidation from "../validations/expense.validation";
 import expenseController from "../controllers/expense.controller";
-import commonValidation from "../validations/common.validation";
 
 const router = express.Router();
 
@@ -25,6 +25,27 @@ router.get(
   middleware.isAuthenticated,
   middleware.ValidateSchema({ params: commonValidation.IdParams }),
   expenseController.fetchExpenseDetails,
+);
+
+router.get(
+  "/summary",
+  middleware.isAuthenticated,
+  middleware.ValidateSchema({ query: expenseValidation.RangeQuery }),
+  expenseController.fetchSummary,
+);
+
+router.get(
+  "/trend",
+  middleware.isAuthenticated,
+  middleware.ValidateSchema({ query: expenseValidation.TrendQuery }),
+  expenseController.fetchTrend,
+);
+
+router.get(
+  "/by-category",
+  middleware.isAuthenticated,
+  middleware.ValidateSchema({ query: expenseValidation.RangeQuery }),
+  expenseController.fetchCategoryBreakdown,
 );
 
 router.patch(
