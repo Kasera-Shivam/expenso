@@ -19,6 +19,7 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 - Summary, category breakdown and trend (daily/weekly) endpoints for dashboard cards and charts
 - Password reset by email (hashed single-use token, 15 min expiry, all sessions revoked after reset)
 - Rate limiting on login, signup, forgot-password and reset-password
+- Profile update and avatar upload (Cloudinary)
 
 **Planned**
 
@@ -50,17 +51,19 @@ No income tracking yet, and the `expenses.date` column stores a date only (no ti
 
 ## API
 
-All routes are under `/api`. Signup, login, refresh and logout use the refresh-token cookie (no bearer token needed). Everything else requires `Authorization: Bearer <accessToken>`.
+All routes are under `/api`. Signup, login, refresh, logout and the password reset routes don't need a bearer token (refresh and logout use the refresh-token cookie). Everything else requires `Authorization: Bearer <accessToken>`.
 
 | Method | Path                       | Description                                                               |
-| ------ | -------------------------- | ------------------------------------------------------------------------- | --- |
+| ------ | -------------------------- | ------------------------------------------------------------------------- |
 | POST   | `/account/create`          | Sign up                                                                   |
 | POST   | `/account/login`           | Log in                                                                    |
 | POST   | `/account/refresh`         | Rotate refresh token, get a new access token                              |
 | POST   | `/account/logout`          | Revoke refresh token                                                      |
 | GET    | `/account/me`              | Current user                                                              |
+| PATCH  | `/account/update`          | Update first and last name                                                |
+| PATCH  | `/account/update/avatar`   | Upload avatar (JPG, PNG or WebP, max 2 MB, stored on Cloudinary)          |
 | POST   | `/account/password/forgot` | Email a password reset link (always responds the same)                    |
-| PUT    | `/account/password/reset`  | Set a new password using the emailed token                                |     |
+| PUT    | `/account/password/reset`  | Set a new password using the emailed token                                |
 | GET    | `/category/list`           | List categories (`?q=` search)                                            |
 | POST   | `/category/create`         | Create category                                                           |
 | PATCH  | `/category/:id/update`     | Update category                                                           |
