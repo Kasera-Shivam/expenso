@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Env files (secrets)
+.env
+.env.*
+!.env.example
+
+# Build output
+out/
+dist/
+dist-ssr/
+build/
+*.tgz
+
+# Code coverage
+coverage/
+*.lcov
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Caches
+.eslintcache
+.cache/
+*.tsbuildinfo
+
+# Local overrides
+*.local
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
