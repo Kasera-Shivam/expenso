@@ -11,6 +11,13 @@ const DEFAULT_CATEGORIES = [
   { name: "Other", color: "#6b7280" },
 ];
 
-const constant = { REFRESH_TOKEN_PATH, REFRESH_TTL_MS, DEFAULT_CATEGORIES };
+const DAY = 86_400_000;
+
+const constant = {
+  REFRESH_TOKEN_PATH,
+  REFRESH_TTL_MS,
+  DEFAULT_CATEGORIES,
+  DAY,
+};
 
 export default constant;
