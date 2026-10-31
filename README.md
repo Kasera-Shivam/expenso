@@ -2,7 +2,7 @@
 
 Expense tracker with secure authentication. Track expenses by category, filter and search them, and view monthly summaries.
 
-> **Status:** In progress. Auth is complete; categories and expenses are being built.
+> **Status:** In progress. Auth and categories are complete; expenses are being built.
 
 ## Features
 
@@ -14,6 +14,7 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 - Refresh tokens stored hashed (SHA-256) in the database
 - Session restore on page reload, silent refresh on 401
 - Default categories created for every new user (transactional)
+- Categories CRUD (per-user, case-insensitive unique names, random color by default)
 
 **Planned**
 
@@ -37,7 +38,7 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 4. Every refresh rotates the token: the old one is revoked and a new one is issued in the same family.
 5. If a revoked token is used again, the whole family is revoked, which signs that session out.
 
-**Known limitations:** no grace window for slow networks, no email verification or password reset yet, expired tokens are cleaned up by a scheduled job.
+**Known limitations:** no grace window for slow networks, no email verification or password reset yet, expired and revoked refresh tokens are not cleaned up yet.
 
 ## Getting Started
 

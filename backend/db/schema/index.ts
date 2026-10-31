@@ -9,7 +9,7 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import utils from "../../lib/utils";
@@ -93,7 +93,10 @@ export const categories = pgTable(
       .defaultNow(),
   },
   (table) => [
-    unique("uq_categories_user_name").on(table.name, table.userId),
+    uniqueIndex("uq_categories_user_name_lower").on(
+      table.userId,
+      sql`lower(${table.name})`,
+    ),
     index("idx_categories_user_id").on(table.userId),
   ],
 );

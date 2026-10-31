@@ -1,4 +1,7 @@
+import type { PGWrappedError } from "../@types";
 import type { StatusCodes } from "http-status-codes";
+import { DrizzleQueryError } from "drizzle-orm";
+import postgres from "postgres";
 
 export class ApiError extends Error {
   public status: StatusCodes;
@@ -11,3 +14,10 @@ export class ApiError extends Error {
     Error.captureStackTrace?.(this, new.target);
   }
 }
+
+export const isPgError = (error: unknown): error is PGWrappedError =>
+  error instanceof DrizzleQueryError &&
+  error.cause instanceof postgres.PostgresError;
+
+export const isUniqueViolation = (error: unknown): boolean =>
+  isPgError(error) && error.cause.code === "23505";
