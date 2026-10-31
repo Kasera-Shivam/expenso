@@ -1,0 +1,70 @@
+import z from "zod";
+
+const CreateExpenseSchema = z.object({
+  title: z
+    .string("Title is required.")
+    .trim()
+    .nonempty("Title is required.")
+    .max(128, "Title cannot exceed 128 characters."),
+  amount: z
+    .string("Amount is required.")
+    .nonempty("Amount is required.")
+    .regex(/^\d{1,8}(\.\d{1,2})?$/, "Invalid amount.")
+    .refine((v) => Number(v) > 0, "Amount must be greater than 0."),
+  date: z
+    .string("Date is required.")
+    .nonempty("Date is required.")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD")
+    .refine(
+      (v) => new Date(`${v}T00:00:00Z`).toISOString().slice(0, 10) === v,
+      "Invalid date",
+    ),
+  note: z
+    .string()
+    .max(500, "Note cannot exceed 500 characters.")
+    .nullable()
+    .optional(),
+  categoryId: z
+    .string("Category id is required.")
+    .length(11, "Invalid category id.")
+    .nullable()
+    .optional(),
+  paymentMethod: z.enum(["cash", "upi", "card", "other"]).optional(),
+});
+
+const ListExpensesQuery = z.object({
+  page: z.coerce.number().int().positive().min(1).default(1),
+  limit: z.coerce.number().int().positive().min(1).max(50).default(10),
+  q: z.string().trim().max(64).optional(),
+  categoryId: z.string().length(11).optional(),
+  paymentMethod: z.enum(["cash", "upi", "card", "other"]).optional(),
+  from: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  to: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  minAmount: z
+    .string()
+    .regex(/^\d{1,8}(\.\d{1,2})?$/)
+    .optional(),
+  maxAmount: z
+    .string()
+    .regex(/^\d{1,8}(\.\d{1,2})?$/)
+    .optional(),
+  sort: z
+    .enum(["date_desc", "date_asc", "amount_desc", "amount_asc"])
+    .default("date_desc"),
+});
+
+const UpdateExpenseSchema = CreateExpenseSchema.partial().refine(
+  (b) => Object.keys(b).length > 0,
+  "Provide at least one field to update.",
+);
+
+export default { CreateExpenseSchema, UpdateExpenseSchema, ListExpensesQuery };
+export type CreateExpenseSchema = z.infer<typeof CreateExpenseSchema>;
+export type UpdateExpenseSchema = z.infer<typeof UpdateExpenseSchema>;
+export type ListExpensesQuery = z.infer<typeof ListExpensesQuery>;
