@@ -85,6 +85,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 const refresh = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const rawToken = req.cookies.refresh_token;
+    console.log(rawToken);
     if (!rawToken)
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Refresh token missing.");
     const [stored] = await db

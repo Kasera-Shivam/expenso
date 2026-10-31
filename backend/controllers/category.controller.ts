@@ -3,6 +3,7 @@ import type {
   CreateCategorySchema,
   UpdateCategorySchema,
 } from "../validations/category.validation";
+import type { IdParams } from "../validations/common.validation";
 import { ApiError, isUniqueViolation } from "../lib/error";
 import utils from "../lib/utils";
 import { StatusCodes } from "http-status-codes";
@@ -70,7 +71,7 @@ const updateCategory = async (
 ) => {
   try {
     const userId = req.user!.id;
-    const { id } = req.params as { id: string };
+    const { id } = res.locals.params as IdParams;
     const { name, color } = req.body as UpdateCategorySchema;
     const [category] = await db
       .update(categories)
@@ -97,7 +98,7 @@ const deleteCategory = async (
 ) => {
   try {
     const userId = req.user!.id;
-    const { id } = req.params as { id: string };
+    const { id } = res.locals.params as IdParams;
     const [deleted] = await db
       .delete(categories)
       .where(and(eq(categories.id, id), eq(categories.userId, userId)))

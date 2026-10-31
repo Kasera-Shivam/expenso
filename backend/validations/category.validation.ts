@@ -13,7 +13,10 @@ const CreateCategorySchema = z.object({
     .optional(),
 });
 
-const UpdateCategorySchema = CreateCategorySchema.partial();
+const UpdateCategorySchema = CreateCategorySchema.partial().refine(
+  (b) => Object.keys(b).length > 0,
+  "Provide at least one field to update.",
+);
 
 export default { CreateCategorySchema, UpdateCategorySchema };
 export type CreateCategorySchema = z.infer<typeof CreateCategorySchema>;

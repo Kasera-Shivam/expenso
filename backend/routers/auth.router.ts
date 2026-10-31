@@ -7,13 +7,13 @@ const router = express.Router();
 
 router.post(
   "/create",
-  middleware.ValidateSchema(authValidation.CreateAccountSchema),
+  middleware.ValidateSchema({ body: authValidation.CreateAccountSchema }),
   authController.createAccount,
 );
 
 router.post(
   "/login",
-  middleware.ValidateSchema(authValidation.LoginSchema),
+  middleware.ValidateSchema({ body: authValidation.LoginSchema }),
   authController.login,
 );
 

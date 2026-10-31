@@ -1,5 +1,6 @@
 import express from "express";
 import middleware from "../middleware";
+import commonValidation from "../validations/common.validation";
 import categoryValidation from "../validations/category.validation";
 import categoryController from "../controllers/category.controller";
 
@@ -8,7 +9,7 @@ const router = express.Router();
 router.post(
   "/create",
   middleware.isAuthenticated,
-  middleware.ValidateSchema(categoryValidation.CreateCategorySchema),
+  middleware.ValidateSchema({ body: categoryValidation.CreateCategorySchema }),
   categoryController.createCategory,
 );
 
@@ -21,13 +22,17 @@ router.get(
 router.patch(
   "/:id/update",
   middleware.isAuthenticated,
-  middleware.ValidateSchema(categoryValidation.UpdateCategorySchema),
+  middleware.ValidateSchema({
+    params: commonValidation.IdParams,
+    body: categoryValidation.UpdateCategorySchema,
+  }),
   categoryController.updateCategory,
 );
 
 router.delete(
   "/:id/delete",
   middleware.isAuthenticated,
+  middleware.ValidateSchema({ params: commonValidation.IdParams }),
   categoryController.deleteCategory,
 );
 
