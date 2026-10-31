@@ -2,7 +2,7 @@
 
 Expense tracker with secure authentication. Track expenses by category, filter and search them, and view monthly summaries.
 
-> **Status:** In progress. Auth and categories are complete; expenses are being built.
+> **Status:** In progress. Auth, categories and expenses API are complete; frontend dashboard is being built.
 
 ## Features
 
@@ -15,11 +15,13 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 - Session restore on page reload, silent refresh on 401
 - Default categories created for every new user (transactional)
 - Categories CRUD (per-user, case-insensitive unique names, random color by default)
+- Expenses CRUD with filters (category, date range, amount, payment method), search, sort and offset pagination
 
 **Planned**
 
-- Expense CRUD with filters, sort, search and pagination
-- Monthly budget and category-wise summary chart
+- Dashboard UI (expenses table, add/edit form, filters)
+- Monthly summary and category-wise breakdown
+- Monthly budget
 - CSV export
 
 ## Tech Stack
@@ -39,6 +41,29 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 5. If a revoked token is used again, the whole family is revoked, which signs that session out.
 
 **Known limitations:** no grace window for slow networks, no email verification or password reset yet, expired and revoked refresh tokens are not cleaned up yet.
+
+## API
+
+All routes are under `/api`. Signup, login, refresh and logout use the refresh-token cookie (no bearer token needed). Everything else requires `Authorization: Bearer <accessToken>`.
+
+| Method | Path                   | Description                                  |
+| ------ | ---------------------- | -------------------------------------------- |
+| POST   | `/account/create`      | Sign up                                      |
+| POST   | `/account/login`       | Log in                                       |
+| POST   | `/account/refresh`     | Rotate refresh token, get a new access token |
+| POST   | `/account/logout`      | Revoke refresh token                         |
+| GET    | `/account/me`          | Current user                                 |
+| GET    | `/category/list`       | List categories (`?q=` search)               |
+| POST   | `/category/create`     | Create category                              |
+| PATCH  | `/category/:id/update` | Update category                              |
+| DELETE | `/category/:id/delete` | Delete category                              |
+| GET    | `/expense/list`        | List with filters, search, sort, pagination  |
+| POST   | `/expense/create`      | Create expense                               |
+| GET    | `/expense/:id/details` | Expense details                              |
+| PATCH  | `/expense/:id/update`  | Update expense                               |
+| DELETE | `/expense/:id/delete`  | Delete expense                               |
+
+**Expenses list query params:** `page`, `limit` (max 50), `q`, `categoryId`, `paymentMethod`, `from`, `to`, `minAmount`, `maxAmount`, `sort` (`date_desc`, `date_asc`, `amount_desc`, `amount_asc`)
 
 ## Getting Started
 
