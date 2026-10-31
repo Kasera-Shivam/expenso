@@ -2,7 +2,7 @@
 
 Expense tracker with secure authentication. Track expenses by category, filter and search them, and view monthly summaries.
 
-> **Status:** In progress. Auth, categories and expenses API are complete; frontend dashboard is being built.
+> **Status:** In progress. Backend (auth, categories, expenses, summary and charts API) is complete; frontend dashboard is being built.
 
 ## Features
 
@@ -16,11 +16,11 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 - Default categories created for every new user (transactional)
 - Categories CRUD (per-user, case-insensitive unique names, random color by default)
 - Expenses CRUD with filters (category, date range, amount, payment method), search, sort and offset pagination
+- Summary, category breakdown and trend (daily/weekly) endpoints for dashboard cards and charts
 
 **Planned**
 
-- Dashboard UI (expenses table, add/edit form, filters)
-- Monthly summary and category-wise breakdown
+- Dashboard UI (expenses table, add/edit form, filters, charts)
 - Monthly budget
 - CSV export
 
@@ -42,28 +42,34 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 
 **Known limitations:** no grace window for slow networks, no email verification or password reset yet, expired and revoked refresh tokens are not cleaned up yet.
 
+No income tracking yet, and the `expenses.date` column stores a date only (no time of day).
+
 ## API
 
 All routes are under `/api`. Signup, login, refresh and logout use the refresh-token cookie (no bearer token needed). Everything else requires `Authorization: Bearer <accessToken>`.
 
-| Method | Path                   | Description                                  |
-| ------ | ---------------------- | -------------------------------------------- |
-| POST   | `/account/create`      | Sign up                                      |
-| POST   | `/account/login`       | Log in                                       |
-| POST   | `/account/refresh`     | Rotate refresh token, get a new access token |
-| POST   | `/account/logout`      | Revoke refresh token                         |
-| GET    | `/account/me`          | Current user                                 |
-| GET    | `/category/list`       | List categories (`?q=` search)               |
-| POST   | `/category/create`     | Create category                              |
-| PATCH  | `/category/:id/update` | Update category                              |
-| DELETE | `/category/:id/delete` | Delete category                              |
-| GET    | `/expense/list`        | List with filters, search, sort, pagination  |
-| POST   | `/expense/create`      | Create expense                               |
-| GET    | `/expense/:id/details` | Expense details                              |
-| PATCH  | `/expense/:id/update`  | Update expense                               |
-| DELETE | `/expense/:id/delete`  | Delete expense                               |
+| Method | Path                   | Description                                                               |
+| ------ | ---------------------- | ------------------------------------------------------------------------- |
+| POST   | `/account/create`      | Sign up                                                                   |
+| POST   | `/account/login`       | Log in                                                                    |
+| POST   | `/account/refresh`     | Rotate refresh token, get a new access token                              |
+| POST   | `/account/logout`      | Revoke refresh token                                                      |
+| GET    | `/account/me`          | Current user                                                              |
+| GET    | `/category/list`       | List categories (`?q=` search)                                            |
+| POST   | `/category/create`     | Create category                                                           |
+| PATCH  | `/category/:id/update` | Update category                                                           |
+| DELETE | `/category/:id/delete` | Delete category                                                           |
+| GET    | `/expense/list`        | List with filters, search, sort, pagination                               |
+| GET    | `/expense/summary`     | Total, count, previous period total and top category for a date range     |
+| GET    | `/expense/by-category` | Category-wise totals for a date range (pie chart)                         |
+| GET    | `/expense/trend`       | Daily (up to 31 days) or weekly totals, optional `categoryId` (bar chart) |
+| POST   | `/expense/create`      | Create expense                                                            |
+| GET    | `/expense/:id/details` | Expense details                                                           |
+| PATCH  | `/expense/:id/update`  | Update expense                                                            |
+| DELETE | `/expense/:id/delete`  | Delete expense                                                            |
 
 **Expenses list query params:** `page`, `limit` (max 50), `q`, `categoryId`, `paymentMethod`, `from`, `to`, `minAmount`, `maxAmount`, `sort` (`date_desc`, `date_asc`, `amount_desc`, `amount_asc`)
+**Summary, by-category and trend query params:** `from` and `to` (`YYYY-MM-DD`, max 366 days apart). `trend` also accepts an optional `categoryId`.
 
 ## Getting Started
 
@@ -80,6 +86,12 @@ cp .env.example .env     # fill in the values
 bun install
 bun drizzle-kit push
 bun run dev
+```
+
+Optional: load sample expenses for an existing account (about 50 expenses over the last 3 months):
+
+```bash
+bun run scripts/seed-expenses.ts you@example.com
 ```
 
 ### Frontend
