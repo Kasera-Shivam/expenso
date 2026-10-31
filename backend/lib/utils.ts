@@ -1,7 +1,15 @@
 import type { Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import path from "path";
+import dirname from "../dirname";
+import fs from "node:fs";
 import { customAlphabet } from "nanoid";
 import { alphanumeric } from "nanoid-dictionary";
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+const templateCache = new Map<string, string>();
 
 const SendSuccess = (
   res: Response,
@@ -15,6 +23,23 @@ const SendSuccess = (
     data?: Record<string, unknown>;
   } = {},
 ) => res.status(status).json({ message, data });
+
+const ReadTemplate = (
+  fileName: string,
+  replacements: Record<string, string> = {},
+): string => {
+  let template = templateCache.get(fileName);
+  if (template === undefined) {
+    template = fs.readFileSync(
+      path.join(dirname, "templates", fileName),
+      "utf8",
+    );
+    templateCache.set(fileName, template);
+  }
+  return template.replace(/{{(\w+)}}/g, (_, key: string) =>
+    escapeHtml(replacements[key] ?? ""),
+  );
+};
 
 const GenerateRandomStr = ({
   length = 11,
@@ -43,6 +68,7 @@ const GenerateRandomColor = () =>
 
 export default {
   SendSuccess,
+  ReadTemplate,
   GenerateRandomStr,
   HslToHex,
   GenerateRandomColor,

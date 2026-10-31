@@ -17,6 +17,8 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 - Categories CRUD (per-user, case-insensitive unique names, random color by default)
 - Expenses CRUD with filters (category, date range, amount, payment method), search, sort and offset pagination
 - Summary, category breakdown and trend (daily/weekly) endpoints for dashboard cards and charts
+- Password reset by email (hashed single-use token, 15 min expiry, all sessions revoked after reset)
+- Rate limiting on login, signup, forgot-password and reset-password
 
 **Planned**
 
@@ -40,7 +42,9 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 4. Every refresh rotates the token: the old one is revoked and a new one is issued in the same family.
 5. If a revoked token is used again, the whole family is revoked, which signs that session out.
 
-**Known limitations:** no grace window for slow networks, no email verification or password reset yet, expired and revoked refresh tokens are not cleaned up yet.
+**Password reset:** `forgot-password` always returns the same response, whether or not the email exists. A random token is emailed as a link, and only its SHA-256 hash is stored with a 15 minute expiry. Using the token is a single atomic update (marks it used, changes the password, and deletes all refresh tokens), so a link works only once and every device is signed out.
+
+**Known limitations:** no grace window for slow networks, no email verification yet, expired and revoked tokens (refresh and password reset) are not cleaned up yet, rate limits are kept in memory (they reset when the server restarts).
 
 No income tracking yet, and the `expenses.date` column stores a date only (no time of day).
 
@@ -48,27 +52,30 @@ No income tracking yet, and the `expenses.date` column stores a date only (no ti
 
 All routes are under `/api`. Signup, login, refresh and logout use the refresh-token cookie (no bearer token needed). Everything else requires `Authorization: Bearer <accessToken>`.
 
-| Method | Path                   | Description                                                               |
-| ------ | ---------------------- | ------------------------------------------------------------------------- |
-| POST   | `/account/create`      | Sign up                                                                   |
-| POST   | `/account/login`       | Log in                                                                    |
-| POST   | `/account/refresh`     | Rotate refresh token, get a new access token                              |
-| POST   | `/account/logout`      | Revoke refresh token                                                      |
-| GET    | `/account/me`          | Current user                                                              |
-| GET    | `/category/list`       | List categories (`?q=` search)                                            |
-| POST   | `/category/create`     | Create category                                                           |
-| PATCH  | `/category/:id/update` | Update category                                                           |
-| DELETE | `/category/:id/delete` | Delete category                                                           |
-| GET    | `/expense/list`        | List with filters, search, sort, pagination                               |
-| GET    | `/expense/summary`     | Total, count, previous period total and top category for a date range     |
-| GET    | `/expense/by-category` | Category-wise totals for a date range (pie chart)                         |
-| GET    | `/expense/trend`       | Daily (up to 31 days) or weekly totals, optional `categoryId` (bar chart) |
-| POST   | `/expense/create`      | Create expense                                                            |
-| GET    | `/expense/:id/details` | Expense details                                                           |
-| PATCH  | `/expense/:id/update`  | Update expense                                                            |
-| DELETE | `/expense/:id/delete`  | Delete expense                                                            |
+| Method | Path                       | Description                                                               |
+| ------ | -------------------------- | ------------------------------------------------------------------------- | --- |
+| POST   | `/account/create`          | Sign up                                                                   |
+| POST   | `/account/login`           | Log in                                                                    |
+| POST   | `/account/refresh`         | Rotate refresh token, get a new access token                              |
+| POST   | `/account/logout`          | Revoke refresh token                                                      |
+| GET    | `/account/me`              | Current user                                                              |
+| POST   | `/account/password/forgot` | Email a password reset link (always responds the same)                    |
+| PUT    | `/account/password/reset`  | Set a new password using the emailed token                                |     |
+| GET    | `/category/list`           | List categories (`?q=` search)                                            |
+| POST   | `/category/create`         | Create category                                                           |
+| PATCH  | `/category/:id/update`     | Update category                                                           |
+| DELETE | `/category/:id/delete`     | Delete category                                                           |
+| GET    | `/expense/list`            | List with filters, search, sort, pagination                               |
+| GET    | `/expense/summary`         | Total, count, previous period total and top category for a date range     |
+| GET    | `/expense/by-category`     | Category-wise totals for a date range (pie chart)                         |
+| GET    | `/expense/trend`           | Daily (up to 31 days) or weekly totals, optional `categoryId` (bar chart) |
+| POST   | `/expense/create`          | Create expense                                                            |
+| GET    | `/expense/:id/details`     | Expense details                                                           |
+| PATCH  | `/expense/:id/update`      | Update expense                                                            |
+| DELETE | `/expense/:id/delete`      | Delete expense                                                            |
 
 **Expenses list query params:** `page`, `limit` (max 50), `q`, `categoryId`, `paymentMethod`, `from`, `to`, `minAmount`, `maxAmount`, `sort` (`date_desc`, `date_asc`, `amount_desc`, `amount_asc`)
+
 **Summary, by-category and trend query params:** `from` and `to` (`YYYY-MM-DD`, max 366 days apart). `trend` also accepts an optional `categoryId`.
 
 ## Getting Started

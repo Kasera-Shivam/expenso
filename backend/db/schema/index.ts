@@ -133,3 +133,28 @@ export const expenses = pgTable(
     check("chk_expenses_amount_positive", sql`${table.amount} > 0`),
   ],
 );
+
+export const passwordResetTokens = pgTable(
+  "password_reset_tokens",
+  {
+    id: varchar("id", { length: 11 })
+      .primaryKey()
+      .$defaultFn(() => utils.GenerateRandomStr()),
+    userId: varchar("user_id", { length: 11 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    token: varchar("token", { length: 64 }).notNull().unique(),
+    expiresAt: timestamp("expires_at", {
+      precision: 3,
+      withTimezone: true,
+    }).notNull(),
+    usedAt: timestamp("used_at", { precision: 3, withTimezone: true }),
+    createdAt: timestamp("created_at", { precision: 3, withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_password_reset_tokens_user_id").on(table.userId),
+    index("idx_password_reset_tokens_expires_at").on(table.expiresAt),
+  ],
+);
