@@ -44,6 +44,39 @@ const LoginSchema = z.object({
   password: z.string("Password is required.").nonempty("Password is required."),
 });
 
-export default { CreateAccountSchema, LoginSchema };
+const ForgotPasswordSchema = z.object({
+  email: z
+    .email({
+      error: (err) => {
+        if (!err.input) return "Email is required.";
+        if (err.code === "invalid_format") return "Invalid email id.";
+      },
+    })
+    .nonempty("Email is required.")
+    .max(256, "Email cannot exceed 256 characters.")
+    .trim()
+    .toLowerCase(),
+});
+
+const ResetPasswordSchema = z.object({
+  token: z
+    .string("Reset password token is required.")
+    .nonempty("Reset password token is required.")
+    .max(1000, "Reset password token cannot exceed 1000 characters."),
+
+  password: z
+    .string("Password is required.")
+    .nonempty("Password is required.")
+    .min(8, "Password must be atleast 8 characters long."),
+});
+
+export default {
+  CreateAccountSchema,
+  LoginSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
+};
 export type CreateAccountSchema = z.infer<typeof CreateAccountSchema>;
 export type LoginSchema = z.infer<typeof LoginSchema>;
+export type ForgotPasswordSchema = z.infer<typeof ForgotPasswordSchema>;
+export type ResetPasswordSchema = z.infer<typeof ResetPasswordSchema>;
