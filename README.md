@@ -2,7 +2,7 @@
 
 Expense tracker with secure authentication. Track expenses by category, filter and search them, and view monthly summaries.
 
-> **Status:** In progress. Backend (auth, categories, expenses, summary and charts API) is complete; frontend dashboard is being built.
+> **Status:** In progress. The backend is complete. On the frontend, login, sign up and adding expenses work; the expenses table, summary cards and charts are being built.
 
 ## Features
 
@@ -20,20 +20,25 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 - Password reset by email (hashed single-use token, 15 min expiry, all sessions revoked after reset)
 - Rate limiting on login, signup, forgot-password and reset-password
 - Profile update and avatar upload (Cloudinary)
+- Frontend: login and sign up, session restore, protected routes
+- Frontend: add expense dialog with validation (numeric amount, date, category search, payment method, note with counter)
+- Frontend: profile menu in the header with log out
 
 **Planned**
 
-- Dashboard UI (expenses table, add/edit form, filters, charts)
+- Expenses table with pagination, sort, search, edit and delete
+- Dashboard summary cards and charts
+- Update account form (name and avatar) and forgot/reset password pages
 - Monthly budget
 - CSV export
 
 ## Tech Stack
 
-| Layer    | Tech                                                                           |
-| -------- | ------------------------------------------------------------------------------ |
-| Frontend | React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query, React Router |
-| Backend  | Node.js, Express, TypeScript, Zod                                              |
-| Database | PostgreSQL, Drizzle ORM                                                        |
+| Layer    | Tech                                                                                                        |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| Frontend | React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query, React Router, React Hook Form, Zod, Axios |
+| Backend  | Node.js, Express, TypeScript, Zod, Nodemailer, Multer, Cloudinary                                           |
+| Database | PostgreSQL, Drizzle ORM                                                                                     |
 
 ## Auth Design
 
@@ -98,7 +103,7 @@ bun drizzle-kit push
 bun run dev
 ```
 
-Optional: load sample expenses for an existing account (about 50 expenses over the last 3 months):
+Optional: load sample expenses for an existing account (about 50 expenses over the last 3 months). Run it from the `backend` folder:
 
 ```bash
 bun run scripts/seed-expenses.ts you@example.com
@@ -145,8 +150,16 @@ VITE_API_URL=
 
 ```
 expenso/
-  backend/    # Express API, Drizzle schema, auth
-  frontend/   # React app
+  backend/
+    controllers/  routers/  middleware/  validators/
+    db/           # Drizzle schema
+    templates/    # email templates
+    scripts/      # seed script
+  frontend/
+    src/
+      api/        # axios calls
+      hooks/      # React Query hooks
+      components/ pages/ routes/ context/
 ```
 
 ## Screenshots
