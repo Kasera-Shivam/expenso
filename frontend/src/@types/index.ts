@@ -34,3 +34,37 @@ export type AuthResponse = {
   user: User;
   accessToken: string;
 };
+
+export type ExpenseListItem = {
+  id: string;
+  title: string;
+  amount: string;
+  note: string | null;
+  date: string;
+  paymentMethod: "cash" | "upi" | "card" | "other";
+  createdAt: string;
+  updatedAt: string;
+  category: Pick<Category, "id" | "name" | "color"> | null;
+};
+
+export type Paginated<T> = {
+  items: T[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export interface ExpenseSummaryResponse {
+  from: string;
+  to: string;
+  days: number;
+  total: string;
+  count: number;
+  previousTotal: string;
+  topCategory: {
+    name: string;
+    color: string;
+    total: string;
+  } | null;
+}

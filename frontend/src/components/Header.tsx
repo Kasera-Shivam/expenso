@@ -11,7 +11,7 @@ const Header = () => {
   const { user } = useAuth();
 
   return (
-    <header className="h-16 w-screen max-w-full">
+    <header className="border-b-muted h-16 w-screen max-w-full border-b">
       <div className="flex h-full w-full items-center justify-between px-5">
         <Link to={"/"} title="Expenso : Home">
           <Logo />
