@@ -1,29 +1,28 @@
+import type { User } from "@/@types";
 import React from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { api, setAccessToken, refreshAccessToken } from "@/api";
-
-export type User = {
-  id: string;
-  firstName: string;
-  lastName: string | null;
-  name: string;
-  avatar: string | null;
-  email: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
 
 type AuthContextType = {
   loading: boolean;
   user: User | null;
   setSession: (user: User, accessToken: string) => void;
+  updateUser: (user: Partial<User>) => void;
   logout: () => Promise<void>;
 };
 
 const AuthContext = React.createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: React.PropsWithChildren) => {
-  const [loading, setLoading] = React.useState<boolean>(true);
+  const queryClient = useQueryClient();
+  const [loading, setLoading] = React.useState(true);
   const [user, setUser] = React.useState<User | null>(null);
+
+  const clearSession = React.useCallback(() => {
+    setAccessToken(null);
+    setUser(null);
+    queryClient.clear();
+  }, [queryClient]);
 
   React.useEffect(() => {
     refreshAccessToken()
@@ -31,30 +30,35 @@ export const AuthProvider = ({ children }: React.PropsWithChildren) => {
       .then((res) => setUser(res.data.data.user))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
-    const onLogout = () => setUser(null);
-    window.addEventListener("auth:logout", onLogout);
-    return () => window.removeEventListener("auth:logout", onLogout);
-  }, []);
+
+    window.addEventListener("auth:logout", clearSession);
+    return () => window.removeEventListener("auth:logout", clearSession);
+  }, [clearSession]);
 
   const setSession = React.useCallback((user: User, accessToken: string) => {
-    setUser(user);
     setAccessToken(accessToken);
+    setUser(user);
+  }, []);
+
+  const updateUser = React.useCallback((patch: Partial<User>) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
   }, []);
 
   const logout = React.useCallback(async () => {
     try {
       await api.post("/account/logout");
+    } catch {
     } finally {
-      setUser(null);
-      setAccessToken(null);
+      clearSession();
     }
-  }, []);
+  }, [clearSession]);
 
-  return (
-    <AuthContext.Provider value={{ loading, user, setSession, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const value = React.useMemo(
+    () => ({ loading, user, setSession, updateUser, logout }),
+    [loading, user, setSession, updateUser, logout],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

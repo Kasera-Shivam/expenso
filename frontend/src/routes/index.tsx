@@ -1,30 +1,41 @@
+import Header from "@/components/Header";
 import { createBrowserRouter } from "react-router";
 import PublicRoute from "./PublicRoute";
-import ProtectedRoute from "./ProtectedRoute";
 import AuthLayout from "@/layouts/AuthLayout";
-import CreateAccount from "@/pages/auth/CreateAccount";
-import Login from "@/pages/auth/Login";
+import CreateAccount from "@/pages/account/CreateAccount";
+import ProtectedRoute from "./ProtectedRoute";
 import Home from "@/pages/home/Home";
+import Login from "@/pages/account/Login";
 import NotFound from "@/pages/not-found/NotFound";
 
 const router = createBrowserRouter([
   {
-    // element: <PublicRoute />,
+    element: <PublicRoute />,
     children: [
       {
+        path: "account",
         element: <AuthLayout />,
         children: [
-          { path: "/account/create", element: <CreateAccount /> },
-          { path: "/account/login", element: <Login /> },
+          { path: "create", element: <CreateAccount /> },
+          { path: "login", element: <Login /> },
         ],
       },
     ],
   },
   {
     element: <ProtectedRoute />,
-    children: [{ path: "/", element: <Home /> }],
+    children: [
+      {
+        path: "",
+        element: <Header />,
+        children: [{ index: true, element: <Home /> }],
+      },
+    ],
   },
-  { path: "*", element: <NotFound /> },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
 ]);
 
 export default router;
