@@ -170,4 +170,4 @@ expenso/
 ## Screenshots
 
 ![Dashboard](docs/dashboard.png)
-![Charts](docs/chart.png)![Dashboard](docs/dashboard.png)
+![Charts](docs/chart.png)
