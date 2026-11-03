@@ -1,7 +1,10 @@
 import type {
+  CategoryBreakdownResponse,
+  DateRange,
   Expense,
   ExpenseListItem,
   ExpenseSummaryResponse,
+  ExpenseTrendResponse,
   Paginated,
 } from "@/@types";
 import type {
@@ -23,6 +26,16 @@ export const fetchExpenseSummary = (params?: { from?: string; to?: string }) =>
   api
     .get("/expense/summary", { params })
     .then((r) => r.data.data as ExpenseSummaryResponse);
+
+export const fetchExpenseTrend = (range: DateRange, categoryId?: string) =>
+  api
+    .get("/expense/trend", { params: { ...range, categoryId } })
+    .then((r) => r.data.data as ExpenseTrendResponse);
+
+export const fetchCategoryBreakdown = (range: DateRange) =>
+  api
+    .get("/expense/by-category", { params: range })
+    .then((r) => r.data.data as CategoryBreakdownResponse);
 
 export const updateExpense = (id: string, body: UpdateExpenseSchema) =>
   api

@@ -2,7 +2,7 @@
 
 Expense tracker with secure authentication. Track expenses by category, filter and search them, and view monthly summaries.
 
-> **Status:** In progress. The backend is complete. On the frontend, authentication, the dashboard (summary cards, expenses table, search, filters, sort and pagination) and adding expenses work; edit, delete and charts are next.
+> **Status:** In progress. The backend is complete. The frontend has authentication, a dashboard (summary cards, expenses table, search, filters, sort, pagination), expense add, edit and delete, and a chart page. Deployment is next.
 
 ## Features
 
@@ -26,11 +26,12 @@ Expense tracker with secure authentication. Track expenses by category, filter a
 - Frontend: dashboard with summary cards (total spent with change vs the previous period, number of expenses, top category)
 - Frontend: expenses table with category pills, search, sortable columns, filter panel and pagination
 - Frontend: filters, sort and page are kept in the URL, so a reload or a shared link shows the same view
+- Frontend: edit and delete expenses (same form as add, delete with confirmation)
+- Frontend: chart page with a range selector (7D, 1M, 3M), a bar chart (daily or weekly) with a category filter, and a pie chart by category
+- Frontend: summary cards sit in the app layout and follow the selected range on the chart page
 
 **Planned**
 
-- Edit and delete expenses
-- Charts (bar chart by day or week, optional category filter)
 - Mobile layout for the table
 - Update account form (name and avatar) and forgot/reset password pages
 - Monthly budget
@@ -169,3 +170,4 @@ expenso/
 ## Screenshots
 
 ![Dashboard](docs/dashboard.png)
+![Charts](docs/chart.png)![Dashboard](docs/dashboard.png)

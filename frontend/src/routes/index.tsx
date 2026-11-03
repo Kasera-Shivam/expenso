@@ -7,6 +7,7 @@ import Home from "@/pages/home/Home";
 import Login from "@/pages/account/Login";
 import AppLayout from "@/layouts/AppLayout";
 import NotFound from "@/pages/not-found/NotFound";
+import Chart from "@/pages/chart/Chart";
 
 const router = createBrowserRouter([
   {
@@ -28,7 +29,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <AppLayout />,
-        children: [{ index: true, element: <Home /> }],
+        children: [
+          { index: true, element: <Home /> },
+          { path: "chart", element: <Chart /> },
+        ],
       },
     ],
   },

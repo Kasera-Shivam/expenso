@@ -20,7 +20,12 @@ import {
   InputGroupText,
   InputGroupTextarea,
 } from "./ui/input-group";
-import { CalendarDaysIcon, IndianRupeeIcon, TypeIcon } from "lucide-react";
+import {
+  CalendarDaysIcon,
+  IndianRupeeIcon,
+  PlusIcon,
+  TypeIcon,
+} from "lucide-react";
 import { cn } from "cn";
 import { NativeSelect, NativeSelectOption } from "./ui/native-select";
 import { useCategories } from "@/hooks/category";
@@ -197,45 +202,52 @@ const ExpenseForm = (props: Props) => {
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={field.name}>Category</FieldLabel>
                 <FieldContent>
-                  <Combobox
-                    items={categories}
-                    value={selected}
-                    onValueChange={(category) =>
-                      field.onChange(category?.id ?? null)
-                    }
-                    itemToStringLabel={(c) => c.name}
-                    itemToStringValue={(c) => c.id}
-                    isItemEqualToValue={(a, b) => a.id === b.id}
-                  >
-                    <ComboboxInput
-                      id={field.name}
-                      placeholder="Select a category"
-                      aria-invalid={fieldState.invalid}
-                      showClear
-                    />
-                    <ComboboxContent className="pointer-events-auto">
-                      <ComboboxEmpty>No category found.</ComboboxEmpty>
-                      <ComboboxList>
-                        {(c: Category) => (
-                          <ComboboxItem
-                            key={c.id}
-                            value={c}
-                            className={"cursor-pointer"}
-                          >
-                            <span
-                              className="size-2.5 rounded-full"
-                              style={{ backgroundColor: c.color }}
-                            />
-                            {c.name}
-                          </ComboboxItem>
-                        )}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
+                  <div className="flex w-full items-center space-x-2">
+                    <Combobox
+                      items={categories}
+                      value={selected}
+                      onValueChange={(category) =>
+                        field.onChange(category?.id ?? null)
+                      }
+                      itemToStringLabel={(c) => c.name}
+                      itemToStringValue={(c) => c.id}
+                      isItemEqualToValue={(a, b) => a.id === b.id}
+                    >
+                      <ComboboxInput
+                        id={field.name}
+                        placeholder="Select a category"
+                        aria-invalid={fieldState.invalid}
+                        showClear
+                        className={"w-full"}
+                      />
+                      <ComboboxContent className="pointer-events-auto">
+                        <ComboboxEmpty>No category found.</ComboboxEmpty>
+                        <ComboboxList>
+                          {(c: Category) => (
+                            <ComboboxItem
+                              key={c.id}
+                              value={c}
+                              className={"cursor-pointer"}
+                            >
+                              <span
+                                className="size-2.5 rounded-full"
+                                style={{ backgroundColor: c.color }}
+                              />
+                              {c.name}
+                            </ComboboxItem>
+                          )}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+
+                    <Button type="button" size={"icon-lg"} variant={"outline"}>
+                      <PlusIcon />
+                    </Button>
+                  </div>
                 </FieldContent>
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             );
           }}
