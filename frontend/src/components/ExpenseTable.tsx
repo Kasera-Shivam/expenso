@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -27,6 +28,8 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
+import UpdateExpense from "./UpdateExpense";
+import { DeleteExpenseDialog } from "./DeleteExpenseDialog";
 
 export type SortValue = "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
 
@@ -39,7 +42,6 @@ interface ExpenseTableProps {
   onPageChange: (page: number) => void;
   sort?: SortValue;
   onSortChange: (sort: SortValue) => void;
-  onEdit?: (expense: any) => void;
   onDelete?: (expense: any) => void;
 }
 
@@ -52,9 +54,13 @@ export default function ExpenseTable({
   onPageChange,
   sort,
   onSortChange,
-  onEdit,
   onDelete,
 }: ExpenseTableProps) {
+  const [editingExpense, setEditingExpense] = useState<any | null>(null);
+  const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(
+    null,
+  );
+
   const handleSort = (column: "date" | "amount") => {
     if (column === "date") {
       const nextSort = sort === "date_desc" ? "date_asc" : "date_desc";
@@ -126,7 +132,7 @@ export default function ExpenseTable({
         <div className="flex items-center space-x-1.5">
           <Button
             variant="outline"
-            size="lg"
+            size="sm"
             className="h-8 border-zinc-800 bg-zinc-900/60 px-2.5 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
@@ -137,7 +143,7 @@ export default function ExpenseTable({
 
           <Button
             variant="outline"
-            size="lg"
+            size="sm"
             className="h-8 border-zinc-800 bg-zinc-900/60 px-2.5 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
@@ -208,8 +214,10 @@ export default function ExpenseTable({
                   key={item.id}
                   className="border-zinc-800/60 transition-colors hover:bg-zinc-900/40"
                 >
-                  <TableCell className="font-medium text-zinc-200">
-                    {item.title}
+                  <TableCell className="max-w-40 font-medium text-zinc-200">
+                    <span className="block truncate" title={item.title}>
+                      {item.title}
+                    </span>
                   </TableCell>
                   <TableCell>
                     {item.category ? (
@@ -264,19 +272,29 @@ export default function ExpenseTable({
                         className="w-36 rounded-lg border-zinc-800 bg-zinc-950 text-zinc-200 shadow-xl"
                       >
                         <DropdownMenuItem
-                          onClick={() => onEdit?.(item)}
+                          onClick={() =>
+                            setEditingExpense({
+                              ...item,
+                              categoryId: item.category?.id ?? null,
+                            })
+                          }
                           className="cursor-pointer gap-2 text-xs focus:bg-zinc-900 focus:text-zinc-100"
                         >
                           <PencilIcon className="size-3.5 text-zinc-400" />
-                          Edit
+                          <span>Edit</span>
                         </DropdownMenuItem>
+
                         <DropdownMenuSeparator className="bg-zinc-800/80" />
+
                         <DropdownMenuItem
-                          onClick={() => onDelete?.(item)}
+                          onClick={() => {
+                            if (onDelete) onDelete(item);
+                            else setDeletingExpenseId(item.id);
+                          }}
                           className="cursor-pointer gap-2 text-xs text-rose-400 focus:bg-rose-500/10 focus:text-rose-300"
                         >
                           <Trash2Icon className="size-3.5" />
-                          Delete
+                          <span>Delete</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -287,6 +305,24 @@ export default function ExpenseTable({
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Dialog (Outside Dropdown) */}
+      {editingExpense && (
+        <UpdateExpense
+          open={!!editingExpense}
+          onOpenChange={(open) => !open && setEditingExpense(null)}
+          expense={editingExpense}
+        />
+      )}
+
+      {/* Delete Confirmation Alert (Outside Dropdown) */}
+      {deletingExpenseId && (
+        <DeleteExpenseDialog
+          open={!!deletingExpenseId}
+          onOpenChange={(open) => !open && setDeletingExpenseId(null)}
+          expenseId={deletingExpenseId}
+        />
+      )}
     </div>
   );
 }

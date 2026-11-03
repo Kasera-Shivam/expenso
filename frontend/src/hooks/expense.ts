@@ -1,3 +1,10 @@
+import type { DateRange } from "@/@types";
+import type {
+  ExpenseFiltersSchema,
+  UpdateExpenseSchema,
+} from "@/validations/expense.validation";
+import { getErrorMessage } from "@/lib/error";
+import { getRange } from "@/lib/date";
 import {
   keepPreviousData,
   useMutation,
@@ -7,16 +14,13 @@ import {
 import {
   createExpense,
   deleteExpense,
+  fetchCategoryBreakdown,
   fetchExpenses,
   fetchExpenseSummary,
+  fetchExpenseTrend,
   updateExpense,
 } from "@/api/expense";
 import { toast } from "sonner";
-import { getErrorMessage } from "@/lib/error";
-import type {
-  ExpenseFiltersSchema,
-  UpdateExpenseSchema,
-} from "@/validations/expense.validation";
 
 export const useExpenseCreate = () => {
   const queryClient = useQueryClient();
@@ -40,18 +44,31 @@ export const useExpenses = (filters: ExpenseFiltersSchema) =>
     placeholderData: keepPreviousData,
   });
 
-export const useExpenseSummary = () => {
-  const now = new Date();
-  const to = now.toISOString().split("T")[0];
-  const pastDate = new Date();
-  pastDate.setDate(pastDate.getDate() - 30);
-  const from = pastDate.toISOString().split("T")[0];
+export const useExpenseSummary = (options?: { from?: string; to?: string }) => {
+  const defaultRange = getRange("1m");
+  const from = options?.from ?? defaultRange.from;
+  const to = options?.to ?? defaultRange.to;
+
   return useQuery({
     queryKey: ["expense-summary", { from, to }],
     queryFn: () => fetchExpenseSummary({ from, to }),
-    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    staleTime: 1000 * 60 * 5,
   });
 };
+
+export const useExpenseTrend = (range: DateRange, categoryId?: string) =>
+  useQuery({
+    queryKey: ["expenses", "trend", range, categoryId],
+    queryFn: () => fetchExpenseTrend(range, categoryId),
+    placeholderData: keepPreviousData,
+  });
+
+export const useCategoryBreakdown = (range: DateRange) =>
+  useQuery({
+    queryKey: ["expenses", "by-category", range],
+    queryFn: () => fetchCategoryBreakdown(range),
+    placeholderData: keepPreviousData,
+  });
 
 export const useExpenseUpdate = () => {
   const queryClient = useQueryClient();

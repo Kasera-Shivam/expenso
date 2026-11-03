@@ -68,3 +68,25 @@ export interface ExpenseSummaryResponse {
     total: string;
   } | null;
 }
+
+export type DateRange = { from: string; to: string };
+
+export type ExpenseTrendResponse = {
+  from: string;
+  to: string;
+  unit: "day" | "week";
+  categoryId: string | null;
+  items: { date: string; total: string }[];
+};
+
+export type CategoryBreakdownResponse = {
+  from: string;
+  to: string;
+  items: {
+    categoryId: string | null;
+    name: string;
+    color: string;
+    total: string;
+    count: number;
+  }[];
+};
