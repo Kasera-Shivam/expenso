@@ -9,6 +9,8 @@ import { startCleanupJob } from "./cron";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,
   api_key: env.CLOUDINARY_API_KEY,
@@ -19,6 +21,10 @@ app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.get("/", (_req, res) =>
+  res.json({ code: 200, message: "Server is running successfully." }),
+);
+app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api", router);
 app.use(middleware.ErrorHandler);
 
