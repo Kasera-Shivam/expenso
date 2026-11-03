@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://expenso-vbmn.onrender.com/api/:path*"
+    },
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
