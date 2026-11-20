@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment variables (keep the .env.example files)
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun-debug.log*
+
+# Test and coverage
+coverage/
+.nyc_output/
+
+# Caches
+.cache/
+.eslintcache
+.vite/
+.turbo/
+.parcel-cache/
+
+# Deployment tools
+.vercel/
+.netlify/
+.render/
+
+# Drizzle Studio and local database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+tmp/
+temp/
+*.tmp
